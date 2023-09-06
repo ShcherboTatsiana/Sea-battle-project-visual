@@ -32,7 +32,6 @@ public partial class MainWindow : Window
             return;
         }
         
-        FillTheCompFieldWithZeros();
         FillTheCompFieldWithShips();
         
         isItPlayerTurn = true;
@@ -1419,24 +1418,12 @@ public partial class MainWindow : Window
     // и очищает (делает пустыми) клетки поля игрока на экране
     private void ClearThePlayerField()
     {
-        for (int vertIndex = 10; vertIndex > 0; vertIndex--)
-        {
-            for (int horizIndex = 10; horizIndex > 0; horizIndex--)
-            {
-                playerField[vertIndex, horizIndex] = "0";
-                this.FindControl<Button>("ButtonP" + vertIndex + horizIndex.ToString())!.Content = "";
-            }
-        }
-    }
-    
-    // Заполняет клетки поля корабля "0"-ми (индекаторам того, что клетка пуста)
-    private void FillTheCompFieldWithZeros()
-    {
         for (int vertIndex = 1; vertIndex <= 10; vertIndex++)
         {
             for (int horizIndex = 1; horizIndex <= 10; horizIndex++)
             {
-                compField[vertIndex, horizIndex] = "0";
+                playerField[vertIndex, horizIndex] = "0";
+                this.FindControl<Button>("ButtonP" + vertIndex + horizIndex.ToString())!.Content = "";
             }
         }
     }
