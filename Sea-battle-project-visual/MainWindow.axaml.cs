@@ -35,6 +35,7 @@ public partial class MainWindow : Window
         FillTheCompFieldWithShips();
         
         isItPlayerTurn = true;
+        gameIsNotStarted = false;
         this.FindControl<Button>("ButtonMistakeInShipPlacement")!.Content = "";
         this.FindControl<Button>("ButtonPlayerTurn")!.Content = "Ваш ход!";
     }
@@ -1067,20 +1068,27 @@ public partial class MainWindow : Window
     
     private void PlayerButtonClicked(int vertIndex, int horizIndex, string buttonName)
     {
-        if (playerField[vertIndex, horizIndex] == "1")
+        if (gameIsNotStarted)
         {
-            this.FindControl<Button>(buttonName)!.Content = "";
-            playerField[vertIndex, horizIndex] = "0";
-            return;
+            if (playerField[vertIndex, horizIndex] == "1")
+            {
+                this.FindControl<Button>(buttonName)!.Content = "";
+                playerField[vertIndex, horizIndex] = "0";
+                return;
+            }
+
+            this.FindControl<Button>(buttonName)!.Content = "🚢";
+            playerField[vertIndex, horizIndex] = "1";
         }
-        
-        this.FindControl<Button>(buttonName)!.Content = "🚢";
-        playerField[vertIndex, horizIndex] = "1";
+
+        if (isItComputerTurn)
+        {
+            ComputerHasChosenCell(vertIndex, horizIndex);
+        }
     }
     
     private void ComputerButtonClicked(int vertIndex, int horizIndex, string buttonName)
     {
-        this.FindControl<Button>(buttonName)!.Content = "";
         // Клетка уже была выбрана ранее
          if (compField[vertIndex, horizIndex] == "X")
         {
@@ -1147,7 +1155,7 @@ public partial class MainWindow : Window
             isItComputerTurn = true;
             // Надпись меняется на "Ход компьютера"
             //Console.WriteLine("Computer turn");
-            ComputerIsChoosingCell();
+                //ComputerIsChoosingCell();
         }
     }
 
@@ -1164,7 +1172,7 @@ public partial class MainWindow : Window
         if (cellVal.Length == 2)
         {
             // Выводим на экран значение клетки
-            this.FindControl<Button>("ButtonP" + vertIndex + horizIndex.ToString())!.Content = "🚢";
+            this.FindControl<Button>("ButtonP" + vertIndex + horizIndex.ToString())!.Content = "💥";
             //Console.WriteLine("P" + vertIndex + ", " + horizIndex.ToString() + " : (ship) " + cellVal);
             // Уменьшаем итоговое число ненайденных частей корабля на 1
             playerShipsStatus[cellVal[1] - 48, cellVal[0] - 48]--;
@@ -1235,7 +1243,7 @@ public partial class MainWindow : Window
             
             // Надпись "Ход Компьютера" сохраняется
             //Console.WriteLine("Still computer turn");
-            ComputerIsChoosingCell();
+                //ComputerIsChoosingCell();
         }
         // Если клетка не является частью корабля
         else
@@ -1284,10 +1292,8 @@ public partial class MainWindow : Window
             while (horizIndex <= compShipsCoordinates[shipNum, 1, shipLength] + 1)
             {
                 // Выбранная клетка не является частью корабля или не была обработана раньше
-                if (compField[vertIndex, horizIndex] is not "X")
+                if (compField[vertIndex, horizIndex] != "X")
                 {
-                    // For checking myself
-                    string cellVal = compField[vertIndex, horizIndex];
                     // Помечаем клетку как обработанную
                     compField[vertIndex, horizIndex] = "X"; 
                     // Выводим на экран её значение
@@ -1316,14 +1322,12 @@ public partial class MainWindow : Window
             while (horizIndex <= playerShipsCoordinates[shipNum, 1, shipLength] + 1)
             {
                 // Выбранная клетка не является частью корабля или уже была обработана раньше
-                if (playerField[vertIndex, horizIndex] is not "X")
+                if (playerField[vertIndex, horizIndex] != "X")
                 {
-                    // For checking myself
-                    string cellVal = playerField[vertIndex, horizIndex];
                     // Помечаем клетку как обработанную
                     playerField[vertIndex, horizIndex] = "X"; 
                     // Выводим на экран её значение
-                    this.FindControl<Button>("Button" + vertIndex + horizIndex.ToString())!.Content = "💧";
+                    this.FindControl<Button>("ButtonP" + vertIndex + horizIndex.ToString())!.Content = "💧";
                     //Console.WriteLine("P" + vertIndex + ", " + horizIndex.ToString() + " : (drop) " + cellVal);
                 }
 
@@ -1335,35 +1339,34 @@ public partial class MainWindow : Window
     }
 
     // Выбор клетки компьютером
-    private void ComputerIsChoosingCell()
+    /*private void ComputerIsChoosingCell()
     {
         // Первая клетка корабля не была найдена
         if (detectedFirstLastPlayerShipCoords[0, 0] == 0)
         {
-            // Рандомно выбираем клетку
-            int vertIndex = randomizer.Next(1, 11);
-            int horizIndex = randomizer.Next(1, 11);
+            int vertIndex = diagCoordNum > 0? diagCoordNum : randomizer.Next(1, 11);
+            int horizIndex = diagCoordNum > 0? diagCoordNum : randomizer.Next(1, 11);
+            diagCoordNum--;
 
             // Если найденная клетка уже была обработана, выбираем другую.
             // И так пока не найдём не обработанную раньше
-            while (playerField[vertIndex, horizIndex] == "X")
+            if (playerField[vertIndex, horizIndex] == "X")
             {
-                vertIndex = randomizer.Next(1, 11);
-                horizIndex = randomizer.Next(1, 11);
+                ComputerIsChoosingCell();
             }
             
             ComputerHasChosenCell(vertIndex, horizIndex);
         }
         // Вторая клетка корабля не была найдена
-        else if (detectedFirstLastPlayerShipCoords[0, 1] == 0)
+        else if (detectedFirstLastPlayerShipCoords[0, 1] == 0 && possibleCellsNum > 1)
         {
             // Выбираем клетку из массива клеток подозрительных на хранение части корабля
             // (Выбираем её с помощью выбора номера клетки по счёту в массиве)
             int possibleCellIndex = randomizer.Next(0, possibleCellsNum);
             // Получаем координаты клетки (Выбор сделан)
-            int vertIndex = possibleCells[0, randomizer.Next(0, possibleCellIndex)];
-            int horizIndex = possibleCells[1, randomizer.Next(0, possibleCellIndex)];
-            
+            int vertIndex = possibleCells[0, possibleCellIndex];
+            int horizIndex = possibleCells[1, possibleCellIndex];
+
             // Меняем (только что) выбранную клетку с ещё не проверенной первой с конца
             // (то есть не той, что уже была выбрана раньше и оказалась в конце)
             // За этим помогает сделить число оставшихся непроверенныъ клеток
@@ -1371,6 +1374,7 @@ public partial class MainWindow : Window
                 (possibleCells[0, possibleCellsNum - 1], possibleCells[0, possibleCellIndex]);
             (possibleCells[1, possibleCellIndex], possibleCells[1, possibleCellsNum - 1]) =
                 (possibleCells[1, possibleCellsNum - 1], possibleCells[1, possibleCellIndex]);
+
             // Уменьшаем число непроверенных клеток подозрительных на хранение части корабля
             possibleCellsNum--;
 
@@ -1382,6 +1386,16 @@ public partial class MainWindow : Window
                 ComputerIsChoosingCell();
                 return;
             }
+            
+            // Передаём координаты клетки в функцию, которая её обрабатывает
+            ComputerHasChosenCell(vertIndex, horizIndex);
+        }
+        else if (possibleCellsNum == 1)
+        {
+            int vertIndex = possibleCells[0, 0];
+            int horizIndex = possibleCells[1, 0];
+            
+            possibleCellsNum--;
             
             // Передаём координаты клетки в функцию, которая её обрабатывает
             ComputerHasChosenCell(vertIndex, horizIndex);
@@ -1412,7 +1426,7 @@ public partial class MainWindow : Window
             // Передаём координаты клетки в функцию, которая её обрабатывает
             ComputerHasChosenCell(vertIndex, horizIndex);
         }
-    }
+    }*/
     
     // Заполняет клетки поля игрока "0"-ми (индекаторам того, что клетка пуста)
     // и очищает (делает пустыми) клетки поля игрока на экране
@@ -1462,5 +1476,6 @@ public partial class MainWindow : Window
     private static bool isItPlayerTurn = true;
     private static bool isItComputerTurn = false;
     private static bool isGameOver = false;
-
+    private static int diagCoordNum = 10;
+    private static bool gameIsNotStarted = true;
 }

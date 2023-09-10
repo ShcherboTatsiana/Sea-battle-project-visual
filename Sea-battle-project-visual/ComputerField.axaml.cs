@@ -158,8 +158,8 @@ public static class ComputerField
         while (cellNum <= shipLength)
         {
             // Сохраняем координаты корабля в специальном массиве
-            compShipsCoordinates[compShipsCounter - 1, 0, cellNum] = currShipCoordinates[0, cellNum];
-            compShipsCoordinates[compShipsCounter - 1, 1, cellNum] = currShipCoordinates[1, cellNum];
+            compShipsCoordinates[compShipsCounter, 0, cellNum] = currShipCoordinates[0, cellNum];
+            compShipsCoordinates[compShipsCounter, 1, cellNum] = currShipCoordinates[1, cellNum];
             // Присваиваем клеткам с частью корабля идентификационный номер корабля
             int vertIndex = currShipCoordinates[0, cellNum];
             int horizIndex = currShipCoordinates[1, cellNum];
@@ -211,7 +211,7 @@ public static class ComputerField
             while (horizIndex <= currShipCoordinates[1, shipLength] + 1)
             {
                 // Выбранная клетка не является частью корабля (=> принадлежит его окружению)
-                if (compField[vertIndex, horizIndex] is "0" or null)
+                if (compField[vertIndex, horizIndex] is "0")
                 {
                     compField[vertIndex, horizIndex] = "1";
                 }
