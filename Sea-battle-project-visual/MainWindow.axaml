@@ -281,7 +281,7 @@
                     Canvas.Left="165" Canvas.Top="135" Click="ButtonC32_Clicked"> </Button>
             <Button x:Name="ButtonC33" Background="White" Height="40" Width="40" FontSize="21"
                     Canvas.Left="210" Canvas.Top="135" Click="ButtonC33_Clicked"> </Button>
-            <Button x:Name="Button34" Background="White" Height="40" Width="40" FontSize="21"
+            <Button x:Name="ButtonC34" Background="White" Height="40" Width="40" FontSize="21"
                     Canvas.Left="255" Canvas.Top="135" Click="ButtonC34_Clicked"> </Button>
             <Button x:Name="ButtonC35" Background="White" Height="40" Width="40" FontSize="21"
                     Canvas.Left="300" Canvas.Top="135" Click="ButtonC35_Clicked"> </Button>
@@ -302,7 +302,7 @@
                     Canvas.Left="165" Canvas.Top="180" Click="ButtonC42_Clicked"> </Button>
             <Button x:Name="ButtonC43" Background="White" Height="40" Width="40" FontSize="21"
                     Canvas.Left="210" Canvas.Top="180" Click="ButtonC43_Clicked"> </Button>
-            <Button x:Name="Button44" Background="White" Height="40" Width="40" FontSize="21"
+            <Button x:Name="ButtonC44" Background="White" Height="40" Width="40" FontSize="21"
                     Canvas.Left="255" Canvas.Top="180" Click="ButtonC44_Clicked"> </Button>
             <Button x:Name="ButtonC45" Background="White" Height="40" Width="40" FontSize="21"
                     Canvas.Left="300" Canvas.Top="180" Click="ButtonC45_Clicked"> </Button>
@@ -323,7 +323,7 @@
                     Canvas.Left="165" Canvas.Top="225" Click="ButtonC52_Clicked"> </Button>
             <Button x:Name="ButtonC53" Background="White" Height="40" Width="40" 
                     Canvas.Left="210" Canvas.Top="225" Click="ButtonC53_Clicked"> </Button>
-            <Button x:Name="Button54" Background="White" Height="40" Width="40" 
+            <Button x:Name="ButtonC54" Background="White" Height="40" Width="40" 
                     Canvas.Left="255" Canvas.Top="225" Click="ButtonC54_Clicked"> </Button>
             <Button x:Name="ButtonC55" Background="White" Height="40" Width="40" 
                     Canvas.Left="300" Canvas.Top="225" Click="ButtonC55_Clicked"> </Button>
@@ -344,7 +344,7 @@
                     Canvas.Left="165" Canvas.Top="270" Click="ButtonC62_Clicked"> </Button>
             <Button x:Name="ButtonC63" Background="White" Height="40" Width="40" 
                     Canvas.Left="210" Canvas.Top="270" Click="ButtonC63_Clicked"> </Button>
-            <Button x:Name="Button64" Background="White" Height="40" Width="40" 
+            <Button x:Name="ButtonC64" Background="White" Height="40" Width="40" 
                     Canvas.Left="255" Canvas.Top="270" Click="ButtonC64_Clicked"> </Button>
             <Button x:Name="ButtonC65" Background="White" Height="40" Width="40" 
                     Canvas.Left="300" Canvas.Top="270" Click="ButtonC65_Clicked"> </Button>
@@ -365,7 +365,7 @@
                     Canvas.Left="165" Canvas.Top="315" Click="ButtonC72_Clicked"> </Button>
             <Button x:Name="ButtonC73" Background="White" Height="40" Width="40" 
                     Canvas.Left="210" Canvas.Top="315" Click="ButtonC73_Clicked"> </Button>
-            <Button x:Name="Button74" Background="White" Height="40" Width="40" 
+            <Button x:Name="ButtonC74" Background="White" Height="40" Width="40" 
                     Canvas.Left="255" Canvas.Top="315" Click="ButtonC74_Clicked"> </Button>
             <Button x:Name="ButtonC75" Background="White" Height="40" Width="40" 
                     Canvas.Left="300" Canvas.Top="315" Click="ButtonC75_Clicked"> </Button>
@@ -386,7 +386,7 @@
                     Canvas.Left="165" Canvas.Top="360" Click="ButtonC82_Clicked"> </Button>
             <Button x:Name="ButtonC83" Background="White" Height="40" Width="40" 
                     Canvas.Left="210" Canvas.Top="360" Click="ButtonC83_Clicked"> </Button>
-            <Button x:Name="Button84" Background="White" Height="40" Width="40" 
+            <Button x:Name="ButtonC84" Background="White" Height="40" Width="40" 
                     Canvas.Left="255" Canvas.Top="360" Click="ButtonC84_Clicked"> </Button>
             <Button x:Name="ButtonC85" Background="White" Height="40" Width="40" 
                     Canvas.Left="300" Canvas.Top="360" Click="ButtonC85_Clicked"> </Button>
@@ -407,7 +407,7 @@
                     Canvas.Left="165" Canvas.Top="405" Click="ButtonC92_Clicked"> </Button>
             <Button x:Name="ButtonC93" Background="White" Height="40" Width="40" 
                     Canvas.Left="210" Canvas.Top="405" Click="ButtonC93_Clicked"> </Button>
-            <Button x:Name="Button94" Background="White" Height="40" Width="40" 
+            <Button x:Name="ButtonC94" Background="White" Height="40" Width="40" 
                     Canvas.Left="255" Canvas.Top="405" Click="ButtonC94_Clicked"> </Button>
             <Button x:Name="ButtonC95" Background="White" Height="40" Width="40" 
                     Canvas.Left="300" Canvas.Top="405" Click="ButtonC95_Clicked"> </Button>
@@ -428,7 +428,7 @@
                     Canvas.Left="165" Canvas.Top="450" Click="ButtonC102_Clicked"> </Button>
             <Button x:Name="ButtonC103" Background="White" Height="40" Width="40" 
                     Canvas.Left="210" Canvas.Top="450" Click="ButtonC103_Clicked"> </Button>
-            <Button x:Name="Button104" Background="White" Height="40" Width="40" 
+            <Button x:Name="ButtonC104" Background="White" Height="40" Width="40" 
                     Canvas.Left="255" Canvas.Top="450" Click="ButtonC104_Clicked"> </Button>
             <Button x:Name="ButtonC105" Background="White" Height="40" Width="40" 
                     Canvas.Left="300" Canvas.Top="450" Click="ButtonC105_Clicked"> </Button>
