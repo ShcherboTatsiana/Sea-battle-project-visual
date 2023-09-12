@@ -6,6 +6,7 @@ using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using static sea_battle_project.PlayerField;
 using static sea_battle_project.ComputerField;
+using System.Collections.Generic;
 
 namespace Sea_battle_project_visual;
 
@@ -1105,43 +1106,44 @@ public partial class MainWindow : Window
     {
         AvaloniaXamlLoader.Load(this);
     }
-    
+
     // Реакция на выбор клетки игроком
     private void PlayerHasChosenCell(int vertIndex, int horizIndex)
     {
         // Получаем значение выбранной клетки и дальше работаем уже с ним
         string cellVal = compField[vertIndex, horizIndex];
-        
+
         // Помечаем клетку как обработанную (уже выбранную однажды)
         compField[vertIndex, horizIndex] = "X";
-        
+
         // Если клетка является частью корабля
         if (cellVal.Length == 2)
         {
             // Выводим на экран значение клетки
-            this.FindControl<Button>("ButtonC" + vertIndex + horizIndex.ToString())!.Content = "🚢";
-            //Console.WriteLine("C" + vertIndex + ", " + horizIndex.ToString() + " : (ship) " + cellVal);
+            this.FindControl<Button>("ButtonC" + vertIndex.ToString() + horizIndex.ToString())!.Content = "🚢";
+
             // Уменьшаем итоговое число ненайденных частей корабля на 1
             compShipsStatus[cellVal[1] - 48, cellVal[0] - 48]--;
-            
+
             // Если были ли найдены все части корабля
             if (compShipsStatus[cellVal[1] - 48, cellVal[0] - 48] == 0)
             {
                 // Помечаем клетки вокруг корабля как обработанные и выводим их содержимое на экран 
                 MarkCellAroundCompShipAsPicked(cellVal[0] - 48, cellVal);
+
                 // Уменьшаем число оставшихся кораблей на 1
                 compShipsCounter--;
+
                 // Если все корабли были найдены
                 if (compShipsCounter == 0)
                 {
                     // Вывести надпись "Игра окончена" на весь экран 
-                    Console.WriteLine("Game Over");
                     isGameOver = true;
                     return;
                     // После чего предложить кнопку "Сыграть ещё раз" или просто очистить всё
                 }
             }
-            
+
             // Надпись "Ваш ход" сохраняется
             //Console.WriteLine("Still your turn");
         }
@@ -1149,13 +1151,13 @@ public partial class MainWindow : Window
         else
         {
             // Выводим на экран значение клетки
-            this.FindControl<Button>("ButtonC" + vertIndex + horizIndex.ToString())!.Content = "💧";
-            //Console.WriteLine("C" + vertIndex + ", " + horizIndex.ToString() + " : (drop) " + cellVal);
+            this.FindControl<Button>("ButtonC" + vertIndex.ToString() + horizIndex.ToString())!.Content = "💧";
+
             isItPlayerTurn = false;
             isItComputerTurn = true;
             // Надпись меняется на "Ход компьютера"
             //Console.WriteLine("Computer turn");
-                //ComputerIsChoosingCell();
+            ComputerIsChoosingCell();
         }
     }
 
@@ -1164,93 +1166,112 @@ public partial class MainWindow : Window
     {
         // Получаем значение выбранной клетки и дальше работаем уже с ним
         string cellVal = playerField[vertIndex, horizIndex];
-        
+
         // Помечаем клетку как обработанную (уже выбранную однажды)
         playerField[vertIndex, horizIndex] = "X";
-        
+
+        // Убираем эту клетку из списка непроверенных клеток
+        uncheckedCells.Remove(vertIndex.ToString() + "," + horizIndex.ToString());
+        uncheckedCellsCounter--;
+
         // Если клетка является частью корабля
         if (cellVal.Length == 2)
         {
             // Выводим на экран значение клетки
             this.FindControl<Button>("ButtonP" + vertIndex + horizIndex.ToString())!.Content = "💥";
-            //Console.WriteLine("P" + vertIndex + ", " + horizIndex.ToString() + " : (ship) " + cellVal);
+
             // Уменьшаем итоговое число ненайденных частей корабля на 1
             playerShipsStatus[cellVal[1] - 48, cellVal[0] - 48]--;
-            
-            // Если были ли найдены все части корабля
+
+            // Если были найдены все части корабля
             if (playerShipsStatus[cellVal[1] - 48, cellVal[0] - 48] == 0)
             {
                 // Помечаем клетки вокруг корабля как обработанные и выводим их содержимое на экран 
                 MarkCellAroundPlayerShipAsPicked(cellVal[0] - 48, cellVal);
+
                 // Уменьшаем число оставшихся кораблей на 1
                 playerShipsCounter--;
+
                 // Если все корабли были найдены
                 if (playerShipsCounter == 0)
                 {
                     // Вывести надпись "Игра окончена" на весь экран 
-                    //Console.WriteLine("Game Over");
                     // После чего предложить кнопку "Сыграть ещё раз" или просто очистить всё
                 }
-                
-                // Очищаем массив с координатами первой и последней найденными клетками корабля
-                detectedFirstLastPlayerShipCoords[0, 0] = 0;
-                detectedFirstLastPlayerShipCoords[0, 1] = 0;
+
+                // Очищаем массив с найденными первой и второй координатами клеток корабля
+                foundFirstSecondPlayerShipCoords[0, 0] = 0;
+                foundFirstSecondPlayerShipCoords[0, 1] = 0;
             }
             // Если первая клетка корабля не была найдена до этого
-            else if (detectedFirstLastPlayerShipCoords[0, 0] == 0)
+            else if (foundFirstSecondPlayerShipCoords[0, 0] == 0)
             {
                 // Помещаем в массив координаты первой найденной клетки корабля
-                detectedFirstLastPlayerShipCoords[0, 0] = vertIndex;
-                detectedFirstLastPlayerShipCoords[1, 0] = horizIndex;
-                
+                foundFirstSecondPlayerShipCoords[0, 0] = vertIndex;
+                foundFirstSecondPlayerShipCoords[1, 0] = horizIndex;
+
                 // Определяем кординаты клеток, окрущающих эту клетку 
                 // (как минимуум одна из них содержит часть корабля)
-                // и помещаем их в спецаильный массив
+                // и помещаем их в список клеток подозрительных на хранение части корабля
+
+                possibleCellsNum = 4;       // Число клеток в самом начале
+                possibleCells.Clear();      // Если список был до этого использован
+
                 // Слева
-                possibleCells[0, 0] = vertIndex;
-                possibleCells[1, 0] = horizIndex - 1;
-            
+                possibleCells.Add(vertIndex.ToString() + "," + (horizIndex - 1).ToString());
+
                 // Сверху
-                possibleCells[0, 1] = vertIndex - 1;
-                possibleCells[1, 1] = horizIndex;
-            
+                possibleCells.Add((vertIndex - 1).ToString() + "," + horizIndex.ToString());
+
                 // Справа
-                possibleCells[0, 2] = vertIndex;
-                possibleCells[1, 2] = horizIndex + 1;
-            
+                possibleCells.Add(vertIndex.ToString() + "," + (horizIndex + 1).ToString());
+
                 // Снизу
-                possibleCells[0, 3] = vertIndex + 1;
-                possibleCells[1, 3] = horizIndex;
+                possibleCells.Add((vertIndex + 1).ToString() + "," + horizIndex.ToString());
             }
             // Если вторая клетка корабля не была найдена до этого
-            else if (detectedFirstLastPlayerShipCoords[0, 1] == 0)
+            else if (foundFirstSecondPlayerShipCoords[0, 1] == 0)
             {
                 // Помещаем в массив кординаты второй найденной клетки корабля
-                detectedFirstLastPlayerShipCoords[0, 1] = vertIndex;
-                detectedFirstLastPlayerShipCoords[1, 1] = horizIndex;
-                
-                // Вычисляем, в каком направлении (гориз или вертик) и в какой стороне
-                // (право/низ  или лево/верх) искать следующую часть корабля
+                foundFirstSecondPlayerShipCoords[0, 1] = vertIndex;
+                foundFirstSecondPlayerShipCoords[1, 1] = horizIndex;
+
+                // Если корабль расположен вертикально
+                if (foundFirstSecondPlayerShipCoords[0, 1] < foundFirstSecondPlayerShipCoords[0, 0])
+                {
+                    (foundFirstSecondPlayerShipCoords[0, 0], foundFirstSecondPlayerShipCoords[0, 1]) =
+                    (foundFirstSecondPlayerShipCoords[0, 1], foundFirstSecondPlayerShipCoords[0, 0]);
+                }
+
+                // Если корабль расположен горизонтально
+                if (foundFirstSecondPlayerShipCoords[1, 1] < foundFirstSecondPlayerShipCoords[1, 0])
+                {
+                    (foundFirstSecondPlayerShipCoords[1, 1], foundFirstSecondPlayerShipCoords[1, 0]) =
+                    (foundFirstSecondPlayerShipCoords[1, 0], foundFirstSecondPlayerShipCoords[1, 1]);
+                }
+
+                // Вычисляем, в каком направлении и стороне
+                // искать следующую часть корабля
                 GetShipDirectionAndSide();
             }
             // Если и первая, и вторая клетки были найдены до этого
             else
             {
-                // Помещаем в массив координаты найденной клетки корабря
-                detectedFirstLastPlayerShipCoords[0, 1] = vertIndex;
-                detectedFirstLastPlayerShipCoords[1, 1] = horizIndex;
+                // Помещаем в массив координаты только что найденной клетки корабря
+                currLastDetectedCell[0, 0] = vertIndex;
+                currLastDetectedCell[1, 0] = horizIndex;
             }
-            
+
             // Надпись "Ход Компьютера" сохраняется
             //Console.WriteLine("Still computer turn");
-                //ComputerIsChoosingCell();
+            ComputerIsChoosingCell();
         }
         // Если клетка не является частью корабля
         else
         {
             // Выводим на экран значение клетки
             this.FindControl<Button>("ButtonP" + vertIndex + horizIndex.ToString())!.Content = "💧";
-            //Console.WriteLine("P" + vertIndex + ", " + horizIndex.ToString() + " : (drop) " + cellVal);
+
             isItComputerTurn = false;
             isItPlayerTurn = true;
             // Надпись меняется на "Ход игрока"
@@ -1258,34 +1279,41 @@ public partial class MainWindow : Window
         }
     }
 
-    // Выясняем положение найденного корабля и в какой стороне искать остальные его части
+    // Выясняем положение найденного корабля,
+    // в какой стороне искать остальные его части и с какой клетки начинать
     private static void GetShipDirectionAndSide()
     {
         // Если верт. коорд. найденных клеток корабля совпадают
-        if (detectedFirstLastPlayerShipCoords[0, 0] == detectedFirstLastPlayerShipCoords[0, 1])
+        if (foundFirstSecondPlayerShipCoords[0, 0] == foundFirstSecondPlayerShipCoords[0, 1])
         {
             // Корабль расположен вертикально
             isHorizontal = true;
         }
-
-        // Если верт. коорд. первой клетки < верт. коорд. второй клетки (корабль расположен верт.)
-        // или гориз. коорд. первой клетки < гориз. коорд. второй клетки (корабль расположен гориз.)
-        if (detectedFirstLastPlayerShipCoords[0, 0] < detectedFirstLastPlayerShipCoords[0, 1] ||
-            detectedFirstLastPlayerShipCoords[1, 0] < detectedFirstLastPlayerShipCoords[1, 1])
+        else
         {
-            // Искать след. части корабля справа/внизу
-            isToLeftOrTop = false;
+            isHorizontal = false;
         }
+
+        isToLeftOrTop = Convert.ToBoolean(randomizer.Next(0, 2));
+
+        currShipSideSign = isToLeftOrTop ? -1 : 1;
+
+        // Выясняем, от какой клетки двигаться (первой или второй)
+        currLastDetectedCell[0, 0] = (currShipSideSign == 1) ?
+            foundFirstSecondPlayerShipCoords[0, 1] : foundFirstSecondPlayerShipCoords[0, 0];
+        currLastDetectedCell[1, 0] = (currShipSideSign == 1) ?
+            foundFirstSecondPlayerShipCoords[1, 1] : foundFirstSecondPlayerShipCoords[1, 0];
     }
-    
-    // Помечает клетки вокруг найденного полностью корабля как обработанные ("Х")
-    // и выводит их содержимое (то, что они пусты) на экран
+
+    // Помечает клетки вокруг найденного полностью корабля компьютера
+    // как обработанные ("Х") и выводит их содержимое (то, что они пусты) на экран
     private void MarkCellAroundCompShipAsPicked(int shipLength, string shipName)
     {
-        // Порядковый номер корабля (ниже написано по какому принципу между ними распределяются цифры от 1 до 10)
+        // Порядковый номер корабля
         int shipNum = GetShipNum(shipName);
+
         // Проходимся по прямоугольнику, состояющему из клеток вокруг корабля и самого корабля
-        int vertIndex = compShipsCoordinates[shipNum,0, 1] - 1;
+        int vertIndex = compShipsCoordinates[shipNum, 0, 1] - 1;
         while (vertIndex <= compShipsCoordinates[shipNum, 0, shipLength] + 1)
         {
             int horizIndex = compShipsCoordinates[shipNum, 1, 1] - 1;
@@ -1295,10 +1323,10 @@ public partial class MainWindow : Window
                 if (compField[vertIndex, horizIndex] != "X")
                 {
                     // Помечаем клетку как обработанную
-                    compField[vertIndex, horizIndex] = "X"; 
+                    compField[vertIndex, horizIndex] = "X";
+
                     // Выводим на экран её значение
-                    this.FindControl<Button>("ButtonC" + vertIndex + horizIndex.ToString())!.Content = "💧";
-                    //Console.WriteLine("C" + vertIndex + ", " + horizIndex.ToString() + " : (drop) " + cellVal);
+                    this.FindControl<Button>("ButtonC" + vertIndex.ToString() + horizIndex.ToString())!.Content = "💧";
                 }
 
                 horizIndex++;
@@ -1307,15 +1335,16 @@ public partial class MainWindow : Window
             vertIndex++;
         }
     }
-    
-    // Помечает клетки вокруг найденного полностью корабля как обработанные ("Х")
+
+    // Помечает клетки вокруг найденного полностью корабля игрока как обработанные ("Х")
     // и выводит их содержимое (то, что они пусты) на экран
     private void MarkCellAroundPlayerShipAsPicked(int shipLength, string shipName)
     {
-        // Порядковый номер корабля (ниже написано по какому принципу между ними распределяются цифры от 1 до 10)
+        // Порядковый номер корабля 
         int shipNum = GetShipNum(shipName);
-        // Прозодимся по прямоугольнику, состояющему из клеток вокруг корабля и самого корабля
-        int vertIndex = playerShipsCoordinates[shipNum,0, 1] - 1;
+
+        // Проходимся по прямоугольнику, состояющему из клеток вокруг корабля и самого корабля
+        int vertIndex = playerShipsCoordinates[shipNum, 0, 1] - 1;
         while (vertIndex <= playerShipsCoordinates[shipNum, 0, shipLength] + 1)
         {
             int horizIndex = playerShipsCoordinates[shipNum, 1, 1] - 1;
@@ -1325,10 +1354,14 @@ public partial class MainWindow : Window
                 if (playerField[vertIndex, horizIndex] != "X")
                 {
                     // Помечаем клетку как обработанную
-                    playerField[vertIndex, horizIndex] = "X"; 
+                    playerField[vertIndex, horizIndex] = "X";
+
+                    // Убираем клетку из списка непроверенных клеток
+                    uncheckedCells.Remove(vertIndex.ToString() + "," + horizIndex.ToString());
+                    uncheckedCellsCounter--;
+
                     // Выводим на экран её значение
-                    this.FindControl<Button>("ButtonP" + vertIndex + horizIndex.ToString())!.Content = "💧";
-                    //Console.WriteLine("P" + vertIndex + ", " + horizIndex.ToString() + " : (drop) " + cellVal);
+                    this.FindControl<Button>("ButtonP" + vertIndex.ToString() + horizIndex.ToString())!.Content = "💧";
                 }
 
                 horizIndex++;
@@ -1339,96 +1372,81 @@ public partial class MainWindow : Window
     }
 
     // Выбор клетки компьютером
-    /*private void ComputerIsChoosingCell()
+    private void ComputerIsChoosingCell()
     {
         // Первая клетка корабля не была найдена
-        if (detectedFirstLastPlayerShipCoords[0, 0] == 0)
+        if (foundFirstSecondPlayerShipCoords[0, 0] == 0)
         {
-            int vertIndex = diagCoordNum > 0? diagCoordNum : randomizer.Next(1, 11);
-            int horizIndex = diagCoordNum > 0? diagCoordNum : randomizer.Next(1, 11);
-            diagCoordNum--;
+            // Рандомно выбираем индекс клетки из списка свободных клеток
+            int index = randomizer.Next(0, uncheckedCellsCounter);
 
-            // Если найденная клетка уже была обработана, выбираем другую.
-            // И так пока не найдём не обработанную раньше
-            if (playerField[vertIndex, horizIndex] == "X")
-            {
-                ComputerIsChoosingCell();
-            }
-            
+            // Получаем координаты
+            string[] cellCoord = uncheckedCells[index].Split(',');
+            int vertIndex = Convert.ToInt32(cellCoord[0]);
+            int horizIndex = Convert.ToInt32(cellCoord[1]);
+
             ComputerHasChosenCell(vertIndex, horizIndex);
         }
         // Вторая клетка корабля не была найдена
-        else if (detectedFirstLastPlayerShipCoords[0, 1] == 0 && possibleCellsNum > 1)
+        else if (foundFirstSecondPlayerShipCoords[0, 1] == 0 && possibleCellsNum > 0)
         {
             // Выбираем клетку из массива клеток подозрительных на хранение части корабля
-            // (Выбираем её с помощью выбора номера клетки по счёту в массиве)
+            // (Выбираем её с помощью выбора номера клетки по счёту в списке)
             int possibleCellIndex = randomizer.Next(0, possibleCellsNum);
+
             // Получаем координаты клетки (Выбор сделан)
-            int vertIndex = possibleCells[0, possibleCellIndex];
-            int horizIndex = possibleCells[1, possibleCellIndex];
+            string[] possibleCellCoord = possibleCells[possibleCellIndex].Split(',');
+            int vertIndex = Convert.ToInt32(possibleCellCoord[0]);
+            int horizIndex = Convert.ToInt32(possibleCellCoord[1]);
 
-            // Меняем (только что) выбранную клетку с ещё не проверенной первой с конца
-            // (то есть не той, что уже была выбрана раньше и оказалась в конце)
-            // За этим помогает сделить число оставшихся непроверенныъ клеток
-            (possibleCells[0, possibleCellIndex], possibleCells[0, possibleCellsNum - 1]) =
-                (possibleCells[0, possibleCellsNum - 1], possibleCells[0, possibleCellIndex]);
-            (possibleCells[1, possibleCellIndex], possibleCells[1, possibleCellsNum - 1]) =
-                (possibleCells[1, possibleCellsNum - 1], possibleCells[1, possibleCellIndex]);
-
-            // Уменьшаем число непроверенных клеток подозрительных на хранение части корабля
+            possibleCells.RemoveAt(possibleCellIndex);
             possibleCellsNum--;
 
-            // Если выбранная клетка уже была обработана раньше
-            // (= часть корабля скрывается в другой клетке из массива)
+            // Если выбранная клетка уже была проверена раньше
             if (playerField[vertIndex, horizIndex] == "X")
             {
                 // Пробуем ещё раз (с другой клеткой из массива клеток подозрительных на хранение части корабля
                 ComputerIsChoosingCell();
                 return;
             }
-            
-            // Передаём координаты клетки в функцию, которая её обрабатывает
-            ComputerHasChosenCell(vertIndex, horizIndex);
-        }
-        else if (possibleCellsNum == 1)
-        {
-            int vertIndex = possibleCells[0, 0];
-            int horizIndex = possibleCells[1, 0];
-            
-            possibleCellsNum--;
-            
+
             // Передаём координаты клетки в функцию, которая её обрабатывает
             ComputerHasChosenCell(vertIndex, horizIndex);
         }
         // Ищем оставшиеся части корабля
         else
         {
-            // Выбираем следующую клетку, которую будем проверять, опираясь на выясенные ранее
+            // Выбираем следующую клетку, которую будем проверять, опираясь на выясненные ранее
             // положение корабля и сторону, в которой стоит искать след. части корабля
-            int vertIndex = isSideChangeHappened? possibleCells[0, 0] : possibleCells[0, 1];
-            int horizIndex = isSideChangeHappened? possibleCells[1, 0] : possibleCells[1, 1];
-            int sideSign = isToLeftOrTop ? -1 : 1;
+            int vertIndex = currLastDetectedCell[0, 0];
+            int horizIndex = currLastDetectedCell[1, 0];
 
-            vertIndex = isHorizontal ? vertIndex : vertIndex + sideSign;
-            horizIndex = isHorizontal ? horizIndex + sideSign : horizIndex;
-            
-            // Если выбранная клетка уже была обработана раньше
-            // (= клетка с частью корабля скрывается с другой стороны)
+            vertIndex = isHorizontal ? vertIndex : vertIndex + currShipSideSign;
+            horizIndex = isHorizontal ? horizIndex + currShipSideSign : horizIndex;
+
+            // Если выбранная клетка уже была проверена раньше
             if (playerField[vertIndex, horizIndex] == "X")
             {
                 // Пробуем ещё раз, но теперь проверяем клетки с другой стороны
-                isSideChangeHappened = true;
-                isToLeftOrTop = !isToLeftOrTop;
+
+                // Меняем направление
+                currShipSideSign *= (-1);
+
+                // Теперь идём от другой клетки
+                currLastDetectedCell[0, 0] = (currShipSideSign == 1) ?
+                    foundFirstSecondPlayerShipCoords[0, 1] : foundFirstSecondPlayerShipCoords[0, 0];
+                currLastDetectedCell[1, 0] = (currShipSideSign == 1) ?
+                    foundFirstSecondPlayerShipCoords[1, 1] : foundFirstSecondPlayerShipCoords[1, 0];
                 ComputerIsChoosingCell();
                 return;
             }
-            
+
             // Передаём координаты клетки в функцию, которая её обрабатывает
             ComputerHasChosenCell(vertIndex, horizIndex);
         }
-    }*/
-    
-    // Заполняет клетки поля игрока "0"-ми (индекаторам того, что клетка пуста)
+    }
+
+    /*// Заполняет клетки поля игрока "0"-ми (индекаторам того, что клетка пуста)
     // и очищает (делает пустыми) клетки поля игрока на экране
     private void ClearThePlayerField()
     {
@@ -1454,28 +1472,51 @@ public partial class MainWindow : Window
                 this.FindControl<Button>("ButtonС" + vertIndex + horizIndex.ToString())!.Content = "";
             }
         }
-    }
-    
+    }*/
+
     // Положение корабля (верт. или гориз.)
-    private static bool isHorizontal = false;
-    // С какой стороны искать клетки
-    private static bool isToLeftOrTop = true;
-    // Менялась ли в процессе сторона, в которой искать клетки
-    private static bool isSideChangeHappened = false;
-    
+    private static bool isHorizontal;
+    // С какой стороны искать клетки корабля
+    private static bool isToLeftOrTop;
+
     // Массив, хранящий клетки подозрительные на хранение части корабля
-    private static int[,] possibleCells = new int[2, 4];
+    private static List<string> possibleCells = new List<string>();
     // Число непроверенных клеток подозрительных на хранение части корабля
     private static int possibleCellsNum = 4;
-    
-    // Хранит координаты клетки корабля найденной первой и последней (на текущий момент,
-    // != что является последней клеткой корабля, который ищется)
-    private static int[,] detectedFirstLastPlayerShipCoords = new int[2, 2];
-    
+
+    // Хранит координаты клетки корабля найденной первой и второй
+    private static int[,] foundFirstSecondPlayerShipCoords = new int[2, 2];
+
+    // Клетка, проверенная последней на текущий момент поиска корабля
+    private static int[,] currLastDetectedCell = new int[2, 1];
+    // С какой стороны искать клетки корабля
+    private static int currShipSideSign;
+
     // Первым ходит игрок
     private static bool isItPlayerTurn = true;
     private static bool isItComputerTurn = false;
     private static bool isGameOver = false;
-    private static int diagCoordNum = 10;
     private static bool gameIsNotStarted = true;
+
+    private static void FillTheUncheckedCellsList()
+    {
+        uncheckedCells.AddRange(new[]
+        {
+            "1,1", "1,2", "1,3", "1,4", "1,5", "1,6", "1,7", "1,8", "1,9", "1,10",
+            "2,1", "2,2", "2,3", "2,4", "2,5", "2,6", "2,7", "2,8", "2,9", "2,10",
+            "3,1", "3,2", "3,3", "3,4", "3,5", "3,6", "3,7", "3,8", "3,9", "3,10",
+            "4,1", "4,2", "4,3", "4,4", "4,5", "4,6", "4,7", "4,8", "4,9", "4,10",
+            "5,1", "5,2", "5,3", "5,4", "5,5", "5,6", "5,7", "5,8", "5,9", "5,10",
+            "6,1", "6,2", "6,3", "6,4", "6,5", "6,6", "6,7", "6,8", "6,9", "6,10",
+            "7,1", "7,2", "7,3", "7,4", "7,5", "7,6", "7,7", "7,8", "7,9", "7,10",
+            "8,1", "8,2", "8,3", "8,4", "8,5", "8,6", "8,7", "8,8", "8,9", "8,10",
+            "9,1", "9,2", "9,3", "9,4", "9,5", "9,6", "9,7", "9,8", "9,9", "9,10",
+            "10,1", "10,2", "10,3", "10,4", "10,5", "10,6", "10,7", "10,8", "10,9", "10,10",
+        });
+    }
+
+    // Список непроверенных клеток
+    private static List<string> uncheckedCells = new List<string>();
+    // Число непроверенных клеток
+    private static int uncheckedCellsCounter = 100;
 }
