@@ -29,23 +29,27 @@ public partial class MainWindow : Window
         }
         catch (Exception e)
         {
-            this.FindControl<Button>("ButtonMistakeInShipPlacement")!.Content = "Ошибка в расстановке кораблей!";
+            this.FindControl<Button>("ButtonMistakeInShipPlacement")!.Content = e.Message;
             return;
         }
         
+        PlayerFieldCheck();
+
+        FillTheUncheckedCellsList();
+        FillTheFreeCellsList();
         FillTheCompFieldWithShips();
-        
+
         isItPlayerTurn = true;
         gameIsNotStarted = false;
         this.FindControl<Button>("ButtonMistakeInShipPlacement")!.Content = "";
-        this.FindControl<Button>("ButtonPlayerTurn")!.Content = "Ваш ход!";
+        this.FindControl<Button>("ButtonPlayerTurn")!.Content = "Your turn!";
     }
     
     // пока не работает
     public void ButtonPlayAgain_Clicked(object sender, RoutedEventArgs args)
     {
-        ClearTheCompField();
-        ClearThePlayerField();
+        //ClearTheCompField();
+        //ClearThePlayerField();
     }
     
     // Клетки игрока
@@ -1082,7 +1086,7 @@ public partial class MainWindow : Window
             playerField[vertIndex, horizIndex] = "1";
         }
 
-        if (isItComputerTurn)
+        if (isItComputerTurn && !isGameOver)
         {
             ComputerHasChosenCell(vertIndex, horizIndex);
         }
@@ -1090,15 +1094,18 @@ public partial class MainWindow : Window
     
     private void ComputerButtonClicked(int vertIndex, int horizIndex, string buttonName)
     {
-        // Клетка уже была выбрана ранее
-         if (compField[vertIndex, horizIndex] == "X")
+        if (!gameIsNotStarted && !isGameOver)
         {
-            return;
-        }
+            // Клетка уже была выбрана ранее
+            if (compField[vertIndex, horizIndex] == "X")
+            {
+                return;
+            }
 
-        if (isItPlayerTurn)
-        {
-            PlayerHasChosenCell(vertIndex, horizIndex);
+            if (isItPlayerTurn)
+            {
+                PlayerHasChosenCell(vertIndex, horizIndex);
+            }
         }
     }
     
@@ -1137,7 +1144,8 @@ public partial class MainWindow : Window
                 // Если все корабли были найдены
                 if (compShipsCounter == 0)
                 {
-                    // Вывести надпись "Игра окончена" на весь экран 
+                    this.FindControl<Button>("ButtonGameOver")!.Content = "GAME OVER";
+                    this.FindControl<Button>("ButtonThePlayerWon")!.Content = "You won!";
                     isGameOver = true;
                     return;
                     // После чего предложить кнопку "Сыграть ещё раз" или просто очистить всё
@@ -1145,7 +1153,7 @@ public partial class MainWindow : Window
             }
 
             // Надпись "Ваш ход" сохраняется
-            //Console.WriteLine("Still your turn");
+            this.FindControl<Button>("ButtonPlayerTurn")!.Content = "Still your turn!";
         }
         // Если клетка не является частью корабля
         else
@@ -1155,8 +1163,10 @@ public partial class MainWindow : Window
 
             isItPlayerTurn = false;
             isItComputerTurn = true;
+
             // Надпись меняется на "Ход компьютера"
-            //Console.WriteLine("Computer turn");
+            this.FindControl<Button>("ButtonComputerTurn")!.Content = "Computer turn!";
+            this.FindControl<Button>("ButtonPlayerTurn")!.Content = "";
             ComputerIsChoosingCell();
         }
     }
@@ -1195,7 +1205,10 @@ public partial class MainWindow : Window
                 // Если все корабли были найдены
                 if (playerShipsCounter == 0)
                 {
-                    // Вывести надпись "Игра окончена" на весь экран 
+                    this.FindControl<Button>("ButtonGameOver")!.Content = "GAME OVER";
+                    this.FindControl<Button>("ButtonTheComputerWon")!.Content = "The computer won!";
+                    isGameOver = true;
+                    return;
                     // После чего предложить кнопку "Сыграть ещё раз" или просто очистить всё
                 }
 
@@ -1263,7 +1276,7 @@ public partial class MainWindow : Window
             }
 
             // Надпись "Ход Компьютера" сохраняется
-            //Console.WriteLine("Still computer turn");
+            this.FindControl<Button>("ButtonComputerTurn")!.Content = "Still computer turn!";
             ComputerIsChoosingCell();
         }
         // Если клетка не является частью корабля
@@ -1274,8 +1287,10 @@ public partial class MainWindow : Window
 
             isItComputerTurn = false;
             isItPlayerTurn = true;
+
             // Надпись меняется на "Ход игрока"
-            //Console.WriteLine("Your turn");
+            this.FindControl<Button>("ButtonPlayerTurn")!.Content = "Your turn!";
+            this.FindControl<Button>("ButtonComputerTurn")!.Content = "";
         }
     }
 
